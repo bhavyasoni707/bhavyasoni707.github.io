@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Jarvis Command Room: Arc Interface</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@300;500;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --arc-cyan: #00f2ff;
+            --arc-blue: #0066ff;
+            --arc-red: #ff3333;
+            --arc-gold: #ffcc00;
+            --bg-dark: #020508;
+            --glass: rgba(0, 242, 255, 0.05);
+        }
+
+        * { box-sizing: border-box; }
+
+        body {
+            margin: 0;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-family: 'Rajdhani', sans-serif;
+            background-color: var(--bg-dark);
+            background-image: 
+                radial-gradient(circle at center, #0a1a2a 0%, #020508 100%),
+                linear-gradient(rgba(0, 242, 255, 0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(0, 242, 255, 0.03) 1px, transparent 1px);
+            background-size: 100% 100%, 30px 30px, 30px 30px;
+            color: white;
+            overflow: hidden;
+        }
+
+        body::after {
+            content: "";
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), 
+                        linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06));
+            background-size: 100% 4px, 3px 100%;
+            pointer-events: none;
+            z-index: 10;
+        }
+
+        .main-frame {
+            position: relative;
+            width: 900px;
+            padding: 40px;
+            background: rgba(0, 15, 30, 0.6);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(0, 242, 255, 0.3);
+            border-radius: 5px;
+            box-shadow: 0 0 50px rgba(0, 0, 0, 0.5), inset 0 0 30px rgba(0, 242, 255, 0.1);
+            display: grid;
+            grid-template-columns: 1fr 1.5fr;
+            gap: 40px;
+        }
+
+        .core-section {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            border-right: 1px solid rgba(0, 242, 255, 0.2);
+        }
+
+        .reactor-svg {
+            width: 220px;
+            height: 220px;
+            filter: drop-shadow(0 0 15px var(--arc-cyan));
+            margin-bottom: 20px;
+        }
+
+        .core-ring {
+            fill: none;
+            stroke: var(--arc-cyan);
+            stroke-width: 2;
+            stroke-dasharray: 10, 5;
+            animation: rotate 10s linear infinite;
+            transform-origin: center;
+        }
+
+        @keyframes rotate { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+
+        .master-energy {
+            text-align: center;
+            font-family: 'Orbitron', sans-serif;
+        }
+
+        .master-energy h2 {
+            font-size: 3.5rem;
+            margin: 0;
+            background: linear-gradient(to bottom, #fff, var(--arc-cyan));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .controls-section h1 {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.2rem;
+            letter-spacing: 4px;
+            margin-top: 0;
+            color: var(--arc-cyan);
+            text-transform: uppercase;
+            border-bottom: 2px solid var(--arc-cyan);
+            padding-bottom: 10px;
+        }
+
+        .system-row {
+            margin: 25px 0;
+            padding: 15px;
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 4px;
+            transition: 0.3s;
+        }
+
+        .system-row:hover { background: rgba(0, 242, 255, 0.08); }
+
+        .label-group {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+            font-family: 'Orbitron';
+            font-size: 0.75rem;
+            color: var(--arc-blue);
+        }
+
+        .interaction-group {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .btn-hex {
+            background: none;
+            border: 1px solid var(--arc-cyan);
+            color: var(--arc-cyan);
+            width: 30px;
+            height: 30px;
+            cursor: pointer;
+            font-weight: bold;
+            clip-path: polygon(25% 0%, 75% 0%, 100% 50%, 75% 100%, 25% 100%, 0% 50%);
+            transition: 0.2s;
+        }
+
+        .btn-hex:hover { background: var(--arc-cyan); color: black; box-shadow: 0 0 15px var(--arc-cyan); }
+
+        .power-bar-bg {
+            flex-grow: 1;
+            height: 6px;
+            background: rgba(255,255,255,0.1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .power-bar-fill {
+            height: 100%;
+            width: 0%;
+            background: var(--arc-cyan);
+            box-shadow: 0 0 15px var(--arc-cyan);
+            transition: width 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        .manual-input {
+            width: 55px;
+            background: none;
+            border: none;
+            border-bottom: 1px solid rgba(0, 242, 255, 0.3);
+            color: white;
+            font-family: 'Orbitron';
+            font-size: 0.9rem;
+            text-align: right;
+            outline: none;
+            transition: 0.3s;
+        }
+
+        .manual-input:focus {
+            border-bottom: 1px solid var(--arc-cyan);
+            background: rgba(0, 242, 255, 0.1);
+        }
+
+        .manual-input::-webkit-inner-spin-button, 
+        .manual-input::-webkit-outer-spin-button { 
+            -webkit-appearance: none; margin: 0; 
+        }
+
+        .status-badge {
+            font-size: 0.65rem;
+            padding: 2px 8px;
+            border: 1px solid #555;
+            border-radius: 10px;
+            text-transform: uppercase;
+        }
+
+        .status-optimal { color: var(--arc-cyan); border-color: var(--arc-cyan); }
+        .status-danger { color: var(--arc-red); border-color: var(--arc-red); animation: blink 1s infinite; }
+
+        @keyframes blink { 50% { opacity: 0.3; } }
+    </style>
+</head>
+<body>
+
+<div class="main-frame">
+    <div class="core-section">
+        <svg class="reactor-svg" viewBox="0 0 100 100">
+            <circle cx="50" cy="50" r="48" stroke="rgba(0, 242, 255, 0.1)" stroke-width="0.5" fill="none" />
+            <circle class="core-ring" cx="50" cy="50" r="42" fill="none" />
+            <circle cx="50" cy="50" r="30" fill="rgba(0, 242, 255, 0.05)" stroke="var(--arc-blue)" stroke-width="1" />
+            <path d="M50 20 L50 35 M80 50 L65 50 M50 80 L50 65 M20 50 L35 50" stroke="var(--arc-cyan)" stroke-width="2" />
+            <circle cx="50" cy="50" r="15" fill="var(--arc-cyan)">
+                <animate attributeName="opacity" values="0.6;1;0.6" dur="2s" repeatCount="indefinite" />
+            </circle>
+        </svg>
+        <div class="master-energy">
+            <div style="font-size: 0.8rem; letter-spacing: 2px; color: var(--arc-blue);">TOTAL BUFFER</div>
+            <h2 id="remaining-val">100</h2>
+            <div id="global-status" style="color: var(--arc-cyan); font-size: 0.7rem;">SYSTEMS NOMINAL</div>
+        </div>
+    </div>
+
+    <div class="controls-section">
+        <h1>Jarvis Command Room // Core Controls</h1>
+        <div id="systems-container"></div>
+    </div>
+</div>
+
+<script>
+    const systemsData = [
+        { id: 'propulsion', name: 'Propulsion Thrusters', val: 0 },
+        { id: 'defense', name: 'Energy Shields', val: 0 },
+        { id: 'navigation', name: 'Sensory Grid', val: 0 },
+        { id: 'comms', name: 'Neural Link', val: 0 }
+    ];
+
+    const MAX_POWER = 100;
+    const container = document.getElementById('systems-container');
+    let alertSpoken = false;
+
+    // Audio Context Setup
+    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+
+    function playBeep(freq = 440, type = 'sine', duration = 0.1) {
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.type = type;
+        osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+        gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + duration);
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.start();
+        osc.stop(audioCtx.currentTime + duration);
+    }
+
+    function jarvisSpeak(text) {
+        const msg = new SpeechSynthesisUtterance();
+        msg.text = text;
+        msg.voice = speechSynthesis.getVoices().find(v => v.name.includes('Google UK English Male')) || null;
+        msg.pitch = 0.8;
+        msg.rate = 0.9;
+        window.speechSynthesis.speak(msg);
+    }
+
+    function init() {
+        systemsData.forEach(sys => {
+            const row = document.createElement('div');
+            row.className = 'system-row';
+            row.innerHTML = `
+                <div class="label-group">
+                    <span>${sys.name}</span>
+                    <span id="stat-${sys.id}" class="status-badge">Offline</span>
+                </div>
+                <div class="interaction-group">
+                    <button class="btn-hex" onclick="adjust('${sys.id}', -10)">-</button>
+                    <div class="power-bar-bg">
+                        <div id="bar-${sys.id}" class="power-bar-fill"></div>
+                    </div>
+                    <button class="btn-hex" onclick="adjust('${sys.id}', 10)">+</button>
+                    <div style="display:flex; align-items:center;">
+                        <input type="number" id="input-${sys.id}" class="manual-input" value="${sys.val}" onchange="manualSet('${sys.id}', this.value)">
+                        <span style="font-family:'Orbitron'; font-size:0.8rem; margin-left:2px; color:var(--arc-cyan)">%</span>
+                    </div>
+                </div>
+            `;
+            container.appendChild(row);
+        });
+        updateUI();
+    }
+
+    function adjust(id, amount) {
+        if (audioCtx.state === 'suspended') audioCtx.resume();
+        playBeep(amount > 0 ? 880 : 440, 'square', 0.05);
+        
+        const sys = systemsData.find(s => s.id === id);
+        const totalUsed = systemsData.reduce((acc, s) => acc + s.val, 0);
+        
+        if (amount > 0 && totalUsed + amount > MAX_POWER) {
+            triggerWarning();
+            sys.val = MAX_POWER - (totalUsed - sys.val);
+        } else {
+            sys.val = Math.max(0, Math.min(100, sys.val + amount));
+        }
+        updateUI();
+    }
+
+    function manualSet(id, value) {
+        if (audioCtx.state === 'suspended') audioCtx.resume();
+        playBeep(660, 'sine', 0.1);
+        const sys = systemsData.find(s => s.id === id);
+        let numVal = parseInt(value) || 0;
+        const otherUsed = systemsData.filter(s => s.id !== id).reduce((acc, s) => acc + s.val, 0);
+        
+        if (otherUsed + numVal > MAX_POWER) {
+            triggerWarning();
+            numVal = MAX_POWER - otherUsed;
+        }
+        sys.val = Math.max(0, Math.min(100, numVal));
+        updateUI();
+    }
+
+    function updateUI() {
+        let totalUsed = 0;
+        systemsData.forEach(sys => {
+            totalUsed += sys.val;
+            document.getElementById(`bar-${sys.id}`).style.width = sys.val + '%';
+            document.getElementById(`input-${sys.id}`).value = sys.val;
+            const stat = document.getElementById(`stat-${sys.id}`);
+            stat.innerText = sys.val === 0 ? 'Offline' : (sys.val <= 80 ? 'Optimal' : 'Peak');
+            stat.className = `status-badge ${sys.val > 0 ? (sys.val > 80 ? 'status-danger' : 'status-optimal') : ''}`;
+        });
+
+        const remaining = MAX_POWER - totalUsed;
+        document.getElementById('remaining-val').innerText = remaining;
+        
+        if (remaining === 0 && !alertSpoken) {
+            jarvisSpeak("Sir, arc reactor output has reached maximum capacity. No further energy diversion possible.");
+            alertSpoken = true;
+        } else if (remaining > 0) {
+            alertSpoken = false;
+        }
+
+        const gStatus = document.getElementById('global-status');
+        gStatus.innerText = remaining < 10 ? "CRITICAL ENERGY LEVELS" : "SYSTEMS NOMINAL";
+        gStatus.style.color = remaining < 10 ? "var(--arc-red)" : "var(--arc-cyan)";
+    }
+
+    function triggerWarning() {
+        playBeep(220, 'sawtooth', 0.3);
+        const frame = document.querySelector('.main-frame');
+        frame.style.borderColor = 'var(--arc-red)';
+        setTimeout(() => frame.style.borderColor = 'rgba(0, 242, 255, 0.3)', 500);
+    }
+
+    init();
+</script>
+</body>
+</html>
